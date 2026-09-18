@@ -1,0 +1,6 @@
+@Bizkit_backend_HostAddress = http://localhost:5286
+
+GET {{Bizkit_backend_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
