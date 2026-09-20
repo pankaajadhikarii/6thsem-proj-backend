@@ -9,6 +9,7 @@ using Bizkit_backend.Services.Cart;
 using Bizkit_backend.Services.Orders;
 using Bizkit_backend.Services.Payments;
 using Bizkit_backend.Services.Products;
+using Bizkit_backend.Services.Resale;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -82,6 +83,7 @@ builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IResaleService, ResaleService>();
 
 builder.Services.AddControllers();
 
