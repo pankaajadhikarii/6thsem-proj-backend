@@ -3,7 +3,7 @@ using Bizkit_backend.Models.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 
-namespace Bizkit_backend.Services.Admin;
+namespace Bizkit_backend.Services.Auth;
 
 public sealed class AdminSetupService(
     UserManager<ApplicationUser> userManager,

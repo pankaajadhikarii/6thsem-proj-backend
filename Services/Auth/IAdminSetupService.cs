@@ -1,4 +1,4 @@
-namespace Bizkit_backend.Services.Admin;
+namespace Bizkit_backend.Services.Auth;
 
 public interface IAdminSetupService
 {

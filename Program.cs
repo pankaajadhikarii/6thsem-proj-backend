@@ -2,8 +2,8 @@ using System.Text;
 using Bizkit_backend.Configuration;
 using Bizkit_backend.Data;
 using Bizkit_backend.Models.Entities;
-using Bizkit_backend.Services.Admin;
 using Bizkit_backend.Services.Auth;
+using Bizkit_backend.Services.BusinessTypes;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -71,6 +71,7 @@ builder.Services.Configure<AdminSettings>(
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IAdminSetupService, AdminSetupService>();
+builder.Services.AddScoped<IBusinessTypeService, BusinessTypeService>();
 
 builder.Services.AddControllers();
 
@@ -83,21 +84,26 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider
         .GetRequiredService<ApplicationDbContext>();
 
-    if (await db.Database.CanConnectAsync())
+    var databaseAvailable = await db.Database.CanConnectAsync(
+        app.Lifetime.ApplicationStopping);
+
+    if (databaseAvailable)
     {
         app.Logger.LogInformation(
             "Connected to PostgreSQL database.");
+
+        var adminSetupService = scope.ServiceProvider
+            .GetRequiredService<IAdminSetupService>();
+
+        await adminSetupService.SetupAsync(
+            app.Lifetime.ApplicationStopping);
     }
     else
     {
         app.Logger.LogWarning(
-            "Could not connect to PostgreSQL database.");
+            "Could not connect to PostgreSQL database. " +
+            "Admin setup was skipped.");
     }
-
-    var adminSetupService = scope.ServiceProvider
-        .GetRequiredService<IAdminSetupService>();
-
-    await adminSetupService.SetupAsync();
 }
 
 if (app.Environment.IsDevelopment())

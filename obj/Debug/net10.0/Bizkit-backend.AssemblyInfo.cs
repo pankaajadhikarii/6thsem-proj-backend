@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Bizkit-backend")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3075975ec7b9c4bfc6e50785bc8a54430d10ce4e")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7cdfddd074abf1b4e302ee704539d63b7333dff0")]
 [assembly: System.Reflection.AssemblyProductAttribute("Bizkit-backend")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Bizkit-backend")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
