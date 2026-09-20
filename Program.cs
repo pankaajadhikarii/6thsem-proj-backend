@@ -1,5 +1,13 @@
+using System.Text;
+using Bizkit_backend.Configuration;
 using Bizkit_backend.Data;
+using Bizkit_backend.Models.Entities;
+using Bizkit_backend.Services.Admin;
+using Bizkit_backend.Services.Auth;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +20,60 @@ var connectionString = builder.Configuration.GetConnectionString(
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString));
 
+builder.Services.AddIdentityCore<ApplicationUser>()
+    .AddRoles<IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
+
+var jwtKey = builder.Configuration["Jwt:Key"]
+    ?? throw new InvalidOperationException(
+        "JWT key not found. Add 'Jwt:Key' to user secrets.");
+
+var jwtIssuer = builder.Configuration["Jwt:Issuer"]
+    ?? throw new InvalidOperationException(
+        "JWT issuer not found. Add 'Jwt:Issuer' to user secrets.");
+
+var jwtAudience = builder.Configuration["Jwt:Audience"]
+    ?? throw new InvalidOperationException(
+        "JWT audience not found. Add 'Jwt:Audience' to user secrets.");
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme =
+        JwtBearerDefaults.AuthenticationScheme;
+
+    options.DefaultChallengeScheme =
+        JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+
+        ValidIssuer = jwtIssuer,
+        ValidAudience = jwtAudience,
+
+        IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(jwtKey)),
+
+        ClockSkew = TimeSpan.Zero
+    };
+});
+
+builder.Services.AddAuthorization();
+
+builder.Services.Configure<AdminSettings>(
+    builder.Configuration.GetSection("Admin"));
+
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IAdminSetupService, AdminSetupService>();
+
+builder.Services.AddControllers();
+
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
@@ -23,20 +85,31 @@ using (var scope = app.Services.CreateScope())
 
     if (await db.Database.CanConnectAsync())
     {
-        app.Logger.LogInformation("Connected to PostgreSQL database.");
+        app.Logger.LogInformation(
+            "Connected to PostgreSQL database.");
     }
     else
     {
-        app.Logger.LogWarning("Could not connect to PostgreSQL database.");
+        app.Logger.LogWarning(
+            "Could not connect to PostgreSQL database.");
     }
+
+    var adminSetupService = scope.ServiceProvider
+        .GetRequiredService<IAdminSetupService>();
+
+    await adminSetupService.SetupAsync();
 }
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllers();
 
 app.Run();
