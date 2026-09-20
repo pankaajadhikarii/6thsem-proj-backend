@@ -6,6 +6,7 @@ using Bizkit_backend.Services.Auth;
 using Bizkit_backend.Services.BusinessTypes;
 using Bizkit_backend.Services.Categories;
 using Bizkit_backend.Services.Cart;
+using Bizkit_backend.Services.Orders;
 using Bizkit_backend.Services.Products;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -78,6 +79,7 @@ builder.Services.AddScoped<IBusinessTypeService, BusinessTypeService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 
 builder.Services.AddControllers();
 
