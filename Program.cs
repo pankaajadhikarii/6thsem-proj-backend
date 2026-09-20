@@ -4,6 +4,7 @@ using Bizkit_backend.Data;
 using Bizkit_backend.Models.Entities;
 using Bizkit_backend.Services.Auth;
 using Bizkit_backend.Services.BusinessTypes;
+using Bizkit_backend.Services.Categories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -72,6 +73,7 @@ builder.Services.Configure<AdminSettings>(
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IAdminSetupService, AdminSetupService>();
 builder.Services.AddScoped<IBusinessTypeService, BusinessTypeService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 
 builder.Services.AddControllers();
 
