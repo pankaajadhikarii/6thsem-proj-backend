@@ -4,6 +4,10 @@ namespace Bizkit_backend.Services.Auth;
 
 public interface IAuthService
 {
+    Task<UserResponseDto?> GetCurrentUserAsync(
+        string userId,
+        CancellationToken cancellationToken = default);
+
     Task<AuthServiceResult> RegisterAsync(
         RegisterRequestDto request,
         CancellationToken cancellationToken = default);

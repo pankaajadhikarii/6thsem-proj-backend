@@ -133,7 +133,7 @@ public sealed class BusinessTypesController(
 
     [HttpDelete("{id:int}")]
     [Authorize(Roles = "Admin")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(
         int id,
@@ -151,7 +151,10 @@ public sealed class BusinessTypesController(
             });
         }
 
-        return NoContent();
+        return Ok(new
+        {
+            message = "Business type deleted successfully."
+        });
     }
 
     [HttpPost("{id:int}/products")]
@@ -184,7 +187,7 @@ public sealed class BusinessTypesController(
 
     [HttpDelete("{id:int}/products/{productId:int}")]
     [Authorize(Roles = "Admin")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RemoveProduct(
         int id,
@@ -204,6 +207,9 @@ public sealed class BusinessTypesController(
             });
         }
 
-        return NoContent();
+        return Ok(new
+        {
+            message = "Product removed from business type successfully."
+        });
     }
 }

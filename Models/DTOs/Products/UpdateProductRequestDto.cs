@@ -9,5 +9,4 @@ public class UpdateProductRequestDto
     public string? ImageUrl { get; set; }
     public int CategoryId { get; set; }
     public int? SupersedesProductId { get; set; }
-    public bool IsActive { get; set; }
 }

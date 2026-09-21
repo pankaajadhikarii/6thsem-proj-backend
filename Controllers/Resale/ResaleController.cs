@@ -156,7 +156,7 @@ public sealed class ResaleController(
     [HttpDelete("{id:int}")]
     [Authorize]
     [ProducesResponseType(
-        StatusCodes.Status204NoContent)]
+        StatusCodes.Status200OK)]
     [ProducesResponseType(
         StatusCodes.Status404NotFound)]
     [ProducesResponseType(
@@ -187,7 +187,10 @@ public sealed class ResaleController(
             });
         }
 
-        return NoContent();
+        return Ok(new
+        {
+            message = "Resale listing removed successfully."
+        });
     }
 
     [HttpPost("{id:int}/purchase")]

@@ -116,7 +116,6 @@ public sealed class CategoryService(
 
         category.Name = name;
         category.Description = request.Description?.Trim();
-        category.IsActive = request.IsActive;
 
         await dbContext.SaveChangesAsync(cancellationToken);
 

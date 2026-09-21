@@ -115,7 +115,6 @@ public sealed class BusinessTypeService(
         businessType.Name = name;
         businessType.Description = request.Description?.Trim();
         businessType.ImageUrl = request.ImageUrl?.Trim();
-        businessType.IsActive = request.IsActive;
 
         await dbContext.SaveChangesAsync(cancellationToken);
 

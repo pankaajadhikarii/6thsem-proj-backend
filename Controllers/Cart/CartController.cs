@@ -116,7 +116,7 @@ public sealed class CartController(
 
     [HttpDelete("items/{itemId:int}")]
     [ProducesResponseType(
-        StatusCodes.Status204NoContent)]
+        StatusCodes.Status200OK)]
     [ProducesResponseType(
         StatusCodes.Status404NotFound)]
     [ProducesResponseType(
@@ -145,12 +145,15 @@ public sealed class CartController(
             });
         }
 
-        return NoContent();
+        return Ok(new
+        {
+            message = "Cart item removed successfully."
+        });
     }
 
     [HttpDelete]
     [ProducesResponseType(
-        StatusCodes.Status204NoContent)]
+        StatusCodes.Status200OK)]
     [ProducesResponseType(
         StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Clear(
@@ -167,7 +170,10 @@ public sealed class CartController(
             userId,
             cancellationToken);
 
-        return NoContent();
+        return Ok(new
+        {
+            message = "Cart cleared successfully."
+        });
     }
 
     private string? GetUserId()

@@ -183,7 +183,6 @@ public sealed class ProductService(
         product.CategoryId = request.CategoryId;
         product.SupersedesProductId =
             request.SupersedesProductId;
-        product.IsActive = request.IsActive;
         product.UpdatedAt = DateTime.UtcNow;
 
         await dbContext.SaveChangesAsync(cancellationToken);

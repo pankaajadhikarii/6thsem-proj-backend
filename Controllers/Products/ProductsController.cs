@@ -121,7 +121,7 @@ public sealed class ProductsController(
 
     [HttpDelete("{id:int}")]
     [Authorize(Roles = "Admin")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(
         int id,
@@ -139,6 +139,9 @@ public sealed class ProductsController(
             });
         }
 
-        return NoContent();
+        return Ok(new
+        {
+            message = "Product deleted successfully."
+        });
     }
 }

@@ -12,6 +12,20 @@ public sealed class AuthService(
     UserManager<ApplicationUser> userManager,
     IConfiguration configuration) : IAuthService
 {
+    public async Task<UserResponseDto?> GetCurrentUserAsync(
+        string userId,
+        CancellationToken cancellationToken = default)
+    {
+        var user = await userManager.FindByIdAsync(userId);
+
+        if (user is null || !user.IsActive)
+        {
+            return null;
+        }
+
+        return ToUserResponse(user);
+    }
+
     public async Task<AuthServiceResult> RegisterAsync(
         RegisterRequestDto request,
         CancellationToken cancellationToken = default)
@@ -159,15 +173,21 @@ public sealed class AuthService(
 
             ExpiresAt = expiresAt,
 
-            User = new UserResponseDto
-            {
-                Id = user.Id,
-                FullName = user.FullName,
-                Email = user.Email ?? string.Empty,
-                PhoneNumber = user.PhoneNumber,
-                Address = user.Address,
-                ProfileImageUrl = user.ProfileImageUrl
-            }
+            User = ToUserResponse(user)
+        };
+    }
+
+    private static UserResponseDto ToUserResponse(
+        ApplicationUser user)
+    {
+        return new UserResponseDto
+        {
+            Id = user.Id,
+            FullName = user.FullName,
+            Email = user.Email ?? string.Empty,
+            PhoneNumber = user.PhoneNumber,
+            Address = user.Address,
+            ProfileImageUrl = user.ProfileImageUrl
         };
     }
 }

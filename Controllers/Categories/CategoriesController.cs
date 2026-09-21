@@ -117,7 +117,7 @@ public sealed class CategoriesController(
 
     [HttpDelete("{id:int}")]
     [Authorize(Roles = "Admin")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(
         int id,
@@ -135,6 +135,9 @@ public sealed class CategoriesController(
             });
         }
 
-        return NoContent();
+        return Ok(new
+        {
+            message = "Category deleted successfully."
+        });
     }
 }
