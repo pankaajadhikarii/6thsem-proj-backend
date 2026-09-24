@@ -13,4 +13,6 @@ public class UserResponseDto
     public string? Address { get; set; }
 
     public string? ProfileImageUrl { get; set; }
+
+    public List<string> Roles { get; set; } = [];
 }

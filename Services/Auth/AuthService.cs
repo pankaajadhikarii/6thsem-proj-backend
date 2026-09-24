@@ -23,7 +23,7 @@ public sealed class AuthService(
             return null;
         }
 
-        return ToUserResponse(user);
+        return await ToUserResponse(user);
     }
 
     public async Task<AuthServiceResult> RegisterAsync(
@@ -173,13 +173,15 @@ public sealed class AuthService(
 
             ExpiresAt = expiresAt,
 
-            User = ToUserResponse(user)
+            User = await ToUserResponse(user)
         };
     }
 
-    private static UserResponseDto ToUserResponse(
+    private async Task<UserResponseDto> ToUserResponse(
         ApplicationUser user)
     {
+        var roles = await userManager.GetRolesAsync(user);
+
         return new UserResponseDto
         {
             Id = user.Id,
@@ -187,7 +189,8 @@ public sealed class AuthService(
             Email = user.Email ?? string.Empty,
             PhoneNumber = user.PhoneNumber,
             Address = user.Address,
-            ProfileImageUrl = user.ProfileImageUrl
+            ProfileImageUrl = user.ProfileImageUrl,
+            Roles = roles.ToList()
         };
     }
 }
