@@ -10,6 +10,7 @@ using Bizkit_backend.Services.Orders;
 using Bizkit_backend.Services.Payments;
 using Bizkit_backend.Services.Products;
 using Bizkit_backend.Services.Resale;
+using Bizkit_backend.Services.Storage;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -75,6 +76,7 @@ builder.Services.AddAuthorization();
 builder.Services.Configure<AdminSettings>(
     builder.Configuration.GetSection("Admin"));
 
+builder.Services.AddScoped<IFileStorageService, FileStorageService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IAdminSetupService, AdminSetupService>();
 builder.Services.AddScoped<IBusinessTypeService, BusinessTypeService>();
@@ -135,6 +137,8 @@ if (app.Environment.IsDevelopment())
 }
 
 // app.UseHttpsRedirection();
+
+app.UseStaticFiles();
 
 app.UseCors("Frontend");
 

@@ -3,12 +3,14 @@ using Bizkit_backend.DTOs.Orders;
 using Bizkit_backend.DTOs.Resale;
 using Bizkit_backend.Models.Entities;
 using Bizkit_backend.Models.Enums;
+using Bizkit_backend.Services.Storage;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bizkit_backend.Services.Resale;
 
 public sealed class ResaleService(
-    ApplicationDbContext dbContext) : IResaleService
+    ApplicationDbContext dbContext,
+    IFileStorageService fileStorageService) : IResaleService
 {
     public async Task<IReadOnlyCollection<ResaleListingResponseDto>>
         GetAllAsync(
@@ -113,6 +115,23 @@ public sealed class ResaleService(
                 "User not found.");
         }
 
+        string? imageUrl = null;
+
+        if (request.Image is not null && request.Image.Length > 0)
+        {
+            var (succeeded, filePath, errorMessage) = await fileStorageService.SaveFileAsync(
+                request.Image,
+                "resale",
+                cancellationToken);
+
+            if (!succeeded)
+            {
+                return ResaleServiceResult.Failure(errorMessage ?? "Resale image upload failed.");
+            }
+
+            imageUrl = filePath;
+        }
+
         var now = DateTime.UtcNow;
 
         var listing = new ResaleListing
@@ -122,7 +141,7 @@ public sealed class ResaleService(
             Price = request.Price,
             Condition = request.Condition,
             Description = request.Description?.Trim(),
-            ImageUrl = request.ImageUrl?.Trim(),
+            ImageUrl = imageUrl,
             Status = ResaleListingStatus.Active,
             CreatedAt = now,
             UpdatedAt = now
@@ -178,12 +197,29 @@ public sealed class ResaleService(
                 "Only active listings can be updated.");
         }
 
+        var imageUrl = listing.ImageUrl;
+
+        if (request.Image is not null && request.Image.Length > 0)
+        {
+            var (succeeded, newFilePath, errorMessage) = await fileStorageService.SaveFileAsync(
+                request.Image,
+                "resale",
+                cancellationToken);
+
+            if (!succeeded)
+            {
+                return ResaleServiceResult.Failure(errorMessage ?? "Resale image upload failed.");
+            }
+
+            fileStorageService.DeleteFile(listing.ImageUrl);
+            imageUrl = newFilePath;
+        }
+
         listing.Price = request.Price;
         listing.Condition = request.Condition;
         listing.Description =
             request.Description?.Trim();
-        listing.ImageUrl =
-            request.ImageUrl?.Trim();
+        listing.ImageUrl = imageUrl;
         listing.UpdatedAt = DateTime.UtcNow;
 
         await dbContext.SaveChangesAsync(

@@ -67,12 +67,13 @@ public sealed class BusinessTypesController(
 
     [HttpPost]
     [Authorize(Roles = "Admin")]
+    [Consumes("multipart/form-data")]
     [ProducesResponseType(
         typeof(BusinessTypeResponseDto),
         StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Create(
-        [FromBody] CreateBusinessTypeRequestDto request,
+        [FromForm] CreateBusinessTypeRequestDto request,
         CancellationToken cancellationToken)
     {
         var result = await businessTypeService.CreateAsync(
@@ -96,6 +97,7 @@ public sealed class BusinessTypesController(
 
     [HttpPut("{id:int}")]
     [Authorize(Roles = "Admin")]
+    [Consumes("multipart/form-data")]
     [ProducesResponseType(
         typeof(BusinessTypeResponseDto),
         StatusCodes.Status200OK)]
@@ -103,7 +105,7 @@ public sealed class BusinessTypesController(
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Update(
         int id,
-        [FromBody] UpdateBusinessTypeRequestDto request,
+        [FromForm] UpdateBusinessTypeRequestDto request,
         CancellationToken cancellationToken)
     {
         var result = await businessTypeService.UpdateAsync(

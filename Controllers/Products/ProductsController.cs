@@ -55,12 +55,13 @@ public sealed class ProductsController(
 
     [HttpPost]
     [Authorize(Roles = "Admin")]
+    [Consumes("multipart/form-data")]
     [ProducesResponseType(
         typeof(ProductResponseDto),
         StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Create(
-        [FromBody] CreateProductRequestDto request,
+        [FromForm] CreateProductRequestDto request,
         CancellationToken cancellationToken)
     {
         var result = await productService.CreateAsync(
@@ -84,6 +85,7 @@ public sealed class ProductsController(
 
     [HttpPut("{id:int}")]
     [Authorize(Roles = "Admin")]
+    [Consumes("multipart/form-data")]
     [ProducesResponseType(
         typeof(ProductResponseDto),
         StatusCodes.Status200OK)]
@@ -91,7 +93,7 @@ public sealed class ProductsController(
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Update(
         int id,
-        [FromBody] UpdateProductRequestDto request,
+        [FromForm] UpdateProductRequestDto request,
         CancellationToken cancellationToken)
     {
         var result = await productService.UpdateAsync(

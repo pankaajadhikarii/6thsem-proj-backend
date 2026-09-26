@@ -1,12 +1,14 @@
 using Bizkit_backend.Data;
 using Bizkit_backend.DTOs.Products;
 using Bizkit_backend.Models.Entities;
+using Bizkit_backend.Services.Storage;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bizkit_backend.Services.Products;
 
 public sealed class ProductService(
-    ApplicationDbContext dbContext) : IProductService
+    ApplicationDbContext dbContext,
+    IFileStorageService fileStorageService) : IProductService
 {
     public async Task<IReadOnlyCollection<ProductResponseDto>>
         GetAllAsync(
@@ -98,6 +100,7 @@ public sealed class ProductService(
     {
         var validationError = await ValidateRequestAsync(
             request.Name,
+            request.Description,
             request.Price,
             request.StockQuantity,
             request.CategoryId,
@@ -110,13 +113,28 @@ public sealed class ProductService(
             return ProductServiceResult.Failure(validationError);
         }
 
+        if (request.Image is null || request.Image.Length == 0)
+        {
+            return ProductServiceResult.Failure("Product image is required.");
+        }
+
+        var (succeeded, filePath, errorMessage) = await fileStorageService.SaveFileAsync(
+            request.Image,
+            "products",
+            cancellationToken);
+
+        if (!succeeded)
+        {
+            return ProductServiceResult.Failure(errorMessage ?? "Product image upload failed.");
+        }
+
         var product = new Product
         {
             Name = request.Name.Trim(),
-            Description = request.Description?.Trim(),
+            Description = request.Description.Trim(),
             Price = request.Price,
             StockQuantity = request.StockQuantity,
-            ImageUrl = request.ImageUrl?.Trim(),
+            ImageUrl = filePath,
             CategoryId = request.CategoryId,
             SupersedesProductId = request.SupersedesProductId,
             IsActive = true,
@@ -163,6 +181,7 @@ public sealed class ProductService(
 
         var validationError = await ValidateRequestAsync(
             request.Name,
+            request.Description,
             request.Price,
             request.StockQuantity,
             request.CategoryId,
@@ -175,11 +194,29 @@ public sealed class ProductService(
             return ProductServiceResult.Failure(validationError);
         }
 
+        var imageUrl = product.ImageUrl;
+
+        if (request.Image is not null && request.Image.Length > 0)
+        {
+            var (succeeded, newFilePath, errorMessage) = await fileStorageService.SaveFileAsync(
+                request.Image,
+                "products",
+                cancellationToken);
+
+            if (!succeeded)
+            {
+                return ProductServiceResult.Failure(errorMessage ?? "Product image upload failed.");
+            }
+
+            fileStorageService.DeleteFile(product.ImageUrl);
+            imageUrl = newFilePath;
+        }
+
         product.Name = request.Name.Trim();
-        product.Description = request.Description?.Trim();
+        product.Description = request.Description.Trim();
         product.Price = request.Price;
         product.StockQuantity = request.StockQuantity;
-        product.ImageUrl = request.ImageUrl?.Trim();
+        product.ImageUrl = imageUrl;
         product.CategoryId = request.CategoryId;
         product.SupersedesProductId =
             request.SupersedesProductId;
@@ -223,6 +260,7 @@ public sealed class ProductService(
 
     private async Task<string?> ValidateRequestAsync(
         string name,
+        string description,
         decimal price,
         int stockQuantity,
         int categoryId,
@@ -236,6 +274,11 @@ public sealed class ProductService(
         }
 
         name = name.Trim();
+
+        if (string.IsNullOrWhiteSpace(description))
+        {
+            return "Product description is required.";
+        }
 
         if (price < 0)
         {

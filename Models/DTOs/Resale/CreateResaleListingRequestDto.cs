@@ -1,4 +1,5 @@
 using Bizkit_backend.Models.Enums;
+using Microsoft.AspNetCore.Http;
 
 namespace Bizkit_backend.DTOs.Resale;
 
@@ -8,5 +9,5 @@ public class CreateResaleListingRequestDto
     public decimal Price { get; set; }
     public ResaleCondition Condition { get; set; }
     public string? Description { get; set; }
-    public string? ImageUrl { get; set; }
+    public IFormFile Image { get; set; } = null!;
 }

@@ -50,11 +50,18 @@ public sealed class CategoryService(
         CancellationToken cancellationToken = default)
     {
         var name = request.Name.Trim();
+        var description = request.Description?.Trim() ?? string.Empty;
 
         if (string.IsNullOrWhiteSpace(name))
         {
             return CategoryServiceResult.Failure(
                 "Category name is required.");
+        }
+
+        if (string.IsNullOrWhiteSpace(description))
+        {
+            return CategoryServiceResult.Failure(
+                "Category description is required.");
         }
 
         if (await NameExistsAsync(
@@ -69,7 +76,7 @@ public sealed class CategoryService(
         var category = new Category
         {
             Name = name,
-            Description = request.Description?.Trim(),
+            Description = description,
             IsActive = true
         };
 
@@ -98,11 +105,18 @@ public sealed class CategoryService(
         }
 
         var name = request.Name.Trim();
+        var description = request.Description?.Trim() ?? string.Empty;
 
         if (string.IsNullOrWhiteSpace(name))
         {
             return CategoryServiceResult.Failure(
                 "Category name is required.");
+        }
+
+        if (string.IsNullOrWhiteSpace(description))
+        {
+            return CategoryServiceResult.Failure(
+                "Category description is required.");
         }
 
         if (await NameExistsAsync(
@@ -115,7 +129,7 @@ public sealed class CategoryService(
         }
 
         category.Name = name;
-        category.Description = request.Description?.Trim();
+        category.Description = description;
 
         await dbContext.SaveChangesAsync(cancellationToken);
 

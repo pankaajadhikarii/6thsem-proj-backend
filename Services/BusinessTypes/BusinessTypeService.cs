@@ -1,12 +1,14 @@
 using Bizkit_backend.Data;
 using Bizkit_backend.DTOs.BusinessTypes;
 using Bizkit_backend.Models.Entities;
+using Bizkit_backend.Services.Storage;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bizkit_backend.Services.BusinessTypes;
 
 public sealed class BusinessTypeService(
-    ApplicationDbContext dbContext) : IBusinessTypeService
+    ApplicationDbContext dbContext,
+    IFileStorageService fileStorageService) : IBusinessTypeService
 {
     public async Task<IReadOnlyCollection<BusinessTypeResponseDto>>
         GetAllAsync(
@@ -45,11 +47,24 @@ public sealed class BusinessTypeService(
         CancellationToken cancellationToken = default)
     {
         var name = request.Name.Trim();
+        var description = request.Description.Trim();
 
         if (string.IsNullOrWhiteSpace(name))
         {
             return BusinessTypeServiceResult.Failure(
                 "Business type name is required.");
+        }
+
+        if (string.IsNullOrWhiteSpace(description))
+        {
+            return BusinessTypeServiceResult.Failure(
+                "Business type description is required.");
+        }
+
+        if (request.Image is null || request.Image.Length == 0)
+        {
+            return BusinessTypeServiceResult.Failure(
+                "Business type image file is required.");
         }
 
         if (await NameExistsAsync(
@@ -61,11 +76,22 @@ public sealed class BusinessTypeService(
                 "A business type with this name already exists.");
         }
 
+        var (succeeded, filePath, errorMessage) = await fileStorageService.SaveFileAsync(
+            request.Image,
+            "business-types",
+            cancellationToken);
+
+        if (!succeeded)
+        {
+            return BusinessTypeServiceResult.Failure(
+                errorMessage ?? "Image upload failed.");
+        }
+
         var businessType = new BusinessType
         {
             Name = name,
-            Description = request.Description?.Trim(),
-            ImageUrl = request.ImageUrl?.Trim(),
+            Description = description,
+            ImageUrl = filePath!,
             IsActive = true
         };
 
@@ -96,11 +122,18 @@ public sealed class BusinessTypeService(
         }
 
         var name = request.Name.Trim();
+        var description = request.Description.Trim();
 
         if (string.IsNullOrWhiteSpace(name))
         {
             return BusinessTypeServiceResult.Failure(
                 "Business type name is required.");
+        }
+
+        if (string.IsNullOrWhiteSpace(description))
+        {
+            return BusinessTypeServiceResult.Failure(
+                "Business type description is required.");
         }
 
         if (await NameExistsAsync(
@@ -112,9 +145,28 @@ public sealed class BusinessTypeService(
                 "A business type with this name already exists.");
         }
 
+        var imageUrl = businessType.ImageUrl;
+
+        if (request.Image is not null && request.Image.Length > 0)
+        {
+            var (succeeded, newFilePath, errorMessage) = await fileStorageService.SaveFileAsync(
+                request.Image,
+                "business-types",
+                cancellationToken);
+
+            if (!succeeded)
+            {
+                return BusinessTypeServiceResult.Failure(
+                    errorMessage ?? "Image upload failed.");
+            }
+
+            fileStorageService.DeleteFile(businessType.ImageUrl);
+            imageUrl = newFilePath;
+        }
+
         businessType.Name = name;
-        businessType.Description = request.Description?.Trim();
-        businessType.ImageUrl = request.ImageUrl?.Trim();
+        businessType.Description = description;
+        businessType.ImageUrl = imageUrl;
 
         await dbContext.SaveChangesAsync(cancellationToken);
 

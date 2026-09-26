@@ -57,6 +57,7 @@ public sealed class ResaleController(
 
     [HttpPost]
     [Authorize]
+    [Consumes("multipart/form-data")]
     [ProducesResponseType(
         typeof(ResaleListingResponseDto),
         StatusCodes.Status201Created)]
@@ -65,7 +66,7 @@ public sealed class ResaleController(
     [ProducesResponseType(
         StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Create(
-        [FromBody] CreateResaleListingRequestDto request,
+        [FromForm] CreateResaleListingRequestDto request,
         CancellationToken cancellationToken)
     {
         var userId = GetUserId();
@@ -102,6 +103,7 @@ public sealed class ResaleController(
 
     [HttpPut("{id:int}")]
     [Authorize]
+    [Consumes("multipart/form-data")]
     [ProducesResponseType(
         typeof(ResaleListingResponseDto),
         StatusCodes.Status200OK)]
@@ -113,7 +115,7 @@ public sealed class ResaleController(
         StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Update(
         int id,
-        [FromBody] UpdateResaleListingRequestDto request,
+        [FromForm] UpdateResaleListingRequestDto request,
         CancellationToken cancellationToken)
     {
         var userId = GetUserId();
